@@ -9,7 +9,8 @@ import {
 import { 
   getAuth,
   createUserWithEmailAndPassword,
-  signOut, signInWithEmailAndPassword
+  signOut, signInWithEmailAndPassword,
+  onAuthStateChanged
  } from 'firebase/auth'
 
 const firebaseConfig = {
@@ -35,7 +36,7 @@ const colRef = collection(db, 'books')
 const q = query(colRef, orderBy('createdAt'))
 
 //real time collection data
-onSnapshot(q, (snapshot)=>{
+const unsubCol = onSnapshot(q, (snapshot)=>{
   let books = []
   snapshot.forEach((doc) => {
     books.push({...doc.data(), id: doc.id})
@@ -90,7 +91,7 @@ deleteBookForm.addEventListener('submit', (e)=> {
 
 const docRef = doc(db, 'books', 'DclGWQgjwc2eLP7vqrhE') 
 
-onSnapshot(docRef, (doc) => {
+const unsubDoc = onSnapshot(docRef, (doc) => {
   console.log(doc.data(), doc.id);
 })
 
@@ -120,7 +121,7 @@ singUpForm.addEventListener('submit', (e) => {
 
   createUserWithEmailAndPassword(auth, email, password)
   .then((userCredential) => {
-    console.log('user created', userCredential.user)
+    // console.log('user created', userCredential.user)
     singUpForm.reset()
   })
   .catch((error) => {
@@ -133,7 +134,7 @@ const logOutButton = document.querySelector('.logout')
 logOutButton.addEventListener('click', (e) => {
   signOut(auth)
   .then(() => {
-    console.log('the user singed out')
+    // console.log('the user singed out')
   })
   .catch(error => { 
     console.log(error.message)
@@ -149,9 +150,23 @@ logInForm.addEventListener('submit', (e) => {
 
   signInWithEmailAndPassword( auth, email, password)
     .then((cred) => {
-      console.log('user logged in', cred.user)
+      // console.log('user logged in', cred.user)
     })
     .catch(error => {
       console.log(error.message)
     })
+})
+
+//subscribing to auth changes
+const unsubAuth = onAuthStateChanged(auth, (user) => {
+  console.log('user status changed', user);
+})
+
+//unsubscribing from changes (auth & db)
+const unsubButton = document.querySelector('.unsub')
+unsubButton.addEventListener('click', () => {
+  console.log('unsubscring')
+  unsubCol()
+  unsubDoc()
+  unsubAuth()
 })
