@@ -6,6 +6,10 @@ import {
   orderBy, serverTimestamp,
   getDoc, updateDoc
 } from 'firebase/firestore'
+import { 
+  getAuth,
+  createUserWithEmailAndPassword
+ } from 'firebase/auth'
 
 const firebaseConfig = {
   apiKey: "AIzaSyCgwYIsOD5adBvIDsLd5Qq4CYDK1R1X2es",
@@ -21,6 +25,7 @@ initializeApp(firebaseConfig)
 
 // init services
 const db = getFirestore()
+const auth = getAuth()
 
 //collection reference
 const colRef = collection(db, 'books')
@@ -104,3 +109,20 @@ updateForm.addEventListener('submit', (e) => {
 
 })
 
+//singnig up users
+const singUpForm = document.querySelector('.signup')
+singUpForm.addEventListener('submit', (e) => {
+  e.preventDefault()
+
+  const email = singUpForm.email.value
+  const password = singUpForm.password.value
+
+  createUserWithEmailAndPassword(auth, email, password)
+  .then((userCredential) => {
+    console.log('user created', userCredential.user)
+    singUpForm.reset()
+  })
+  .catch((error) => {
+    console.log(error)
+  })
+})
