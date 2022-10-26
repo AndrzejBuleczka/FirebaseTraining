@@ -1,6 +1,6 @@
 import {initializeApp } from 'firebase/app'
 import {
-  getFirestore, collection, getDocs,
+  getFirestore, collection, onSnapshot,
   addDoc, deleteDoc, doc
 } from 'firebase/firestore'
 
@@ -22,42 +22,53 @@ const db = getFirestore()
 //collection reference
 const colRef = collection(db, 'books')
 
-//get the collection data
-getDocs(colRef)
-  .then((snapshot) => {
-    let books = []
-    snapshot.forEach((doc) => {
-      books.push({...doc.data(), id: doc.id})
-    })
-    console.log(books);
+//real time collection data
+onSnapshot(colRef, (snapshot)=>{
+  let books = []
+  snapshot.forEach((doc) => {
+    books.push({...doc.data(), id: doc.id})
   })
-  .catch((error) => {
-    console.log(error)
-  })
+  console.log(books);
+})
+
+//not real time collection data
+// getDocs(colRef)
+//   .then((snapshot) => {
+//     let books = []
+//     snapshot.forEach((doc) => {
+//       books.push({...doc.data(), id: doc.id})
+//     })
+//     console.log(books);
+//   })
+//   .catch((error) => {
+//     console.log(error)
+//   })
+
+
 
 //adding documents
-  const addBookForm = document.querySelector('.add')
-  addBookForm.addEventListener('submit', (e)=> {
-    e.preventDefault()
+const addBookForm = document.querySelector('.add')
+addBookForm.addEventListener('submit', (e)=> {
+  e.preventDefault()
     
-    addDoc(colRef, {
-      title: addBookForm.title.value,
-      author: addBookForm.author.value
-    })
-    .then(() => {
-        addBookForm.reset()
-      })
+  addDoc(colRef, {
+    title: addBookForm.title.value,
+    author: addBookForm.author.value
   })
+  .then(() => {
+    addBookForm.reset()
+  })
+})
 
 // deleting douments
-  const deleteBookForm = document.querySelector('.delete')
-  deleteBookForm.addEventListener('submit', (e)=> {
-    e.preventDefault()
+const deleteBookForm = document.querySelector('.delete')
+deleteBookForm.addEventListener('submit', (e)=> {
+  e.preventDefault()
     
-    const docRef = doc(db, 'books', deleteBookForm.id.value)
+  const docRef = doc(db, 'books', deleteBookForm.id.value)
     
-    deleteDoc(docRef)
-     .then(() => {
+  deleteDoc(docRef)
+    .then(() => {
       deleteBookForm.reset()
-     })
-  })
+    })
+})
